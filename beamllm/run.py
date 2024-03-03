@@ -24,7 +24,7 @@ from apache_beam.options.pipeline_options import PipelineOptions, SetupOptions
 from apache_beam.runners.runner import PipelineResult
 
 # Beam LLM
-from beamllm.config import ModelConfig, SinkConfig, SourceConfig
+from beamllm.config import ModelConfig, ModelName, SinkConfig, SourceConfig
 from beamllm.pipeline import build_pipeline
 
 
@@ -33,6 +33,12 @@ def parse_known_args(argv):
     parser = argparse.ArgumentParser()
     parser.add_argument("--input", dest="input", required=True, help="Input pub/sub topic")
     parser.add_argument("--output", dest="output", required=True, help="Output pub/sub topic")
+    parser.add_argument("--model_name", dest="model_name", required=True, help="LLM model name")
+    parser.add_argument(
+        "--device",
+        default="CPU",
+        help="Device to be used on the Runner. Choices are (CPU, GPU).",
+    )
     return parser.parse_known_args(argv)
 
 
@@ -46,7 +52,7 @@ def run(argv=None, save_main_session=True, test_pipeline=None) -> PipelineResult
     known_args, pipeline_args = parse_known_args(argv)
 
     # setup configs
-    model_config = ModelConfig()
+    model_config = ModelConfig(name=ModelName(known_args.model_name), device=known_args.device)
     source_config = SourceConfig(input=known_args.input)
     sink_config = SinkConfig(output=known_args.output)
 

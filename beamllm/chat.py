@@ -35,12 +35,15 @@ subscriber = pubsub_v1.SubscriberClient()
 
 topic_a_path = publisher.topic_path(project_id, topic_a_name)
 topic_b_path = subscriber.topic_path(project_id, topic_b_name)
-# Use the default subscription
-subscription_path = subscriber.subscription_path(project_id, f"{topic_b_name}-sub")
 
-# Create the subscription if it doesn't exist
+# create a chat subscription for this chat with a session id
+session_id = str(uuid.uuid4())
+filter = f'attributes.id="{session_id}"'
+subscription_path = subscriber.subscription_path(project_id, f"{topic_b_name}-{session_id}")
+
+# Create the subscription for this chat with the filter
 try:
-    subscriber.create_subscription(name=subscription_path, topic=topic_b_path)
+    subscriber.create_subscription(request={"name": subscription_path, "topic": topic_b_path, "filter": filter})
 except Exception as e:
     # Subscription likely already exists
     print(f"Subscription may already exist: {e}")
@@ -50,7 +53,8 @@ is_message_received = False
 
 def callback(message):
     bot = message.data.decode("utf-8")
-    print(f"Bot: {bot}")
+    id = message.attributes.get("id")
+    print(f"Bot {id}: {bot}")
     global is_message_received
     is_message_received = True
     message.ack()
@@ -63,7 +67,7 @@ print(f"Listening for messages on {subscription_path}..\n")
 while True:
     try:
         text = input("Enter message to chat (Ctrl-Break to exit): ")
-        publisher.publish(topic_a_path, data=text.encode("utf-8"), id=str(uuid.uuid4()))
+        publisher.publish(topic_a_path, data=text.encode("utf-8"), id=session_id)
 
         # keep waiting for the message
         is_message_received = False
@@ -80,4 +84,7 @@ while True:
         break
 
 
-print("Script finished.")
+with subscriber:
+    subscriber.delete_subscription(request={"subscription": subscription_path})
+print(f"Subscription deleted: {subscription_path}.")
+print("Chat finished.")
