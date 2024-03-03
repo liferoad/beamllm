@@ -40,7 +40,7 @@ RUN \
     && pip install --upgrade pip \
     && pip install --no-cache-dir -r requirements.txt \
     && pip install --no-cache-dir -U keras>=3 \
-    && pip install --no-cache-dir -U torch==2.2.1+cu118 torchvision==0.17.1+cu118 --index-url https://download.pytorch.org/whl/cu118
+    && pip install --no-cache-dir -U torch==2.0.0+cu118 torchvision==0.15.1+cu118 --index-url https://download.pytorch.org/whl/cu118
 
 # Copy files from official SDK image, including script/dependencies.
 COPY --from=apache/beam_python3.10_sdk:${BEAM_VERSION} /opt/apache/beam /opt/apache/beam
