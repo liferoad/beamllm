@@ -28,6 +28,10 @@ Only `FLAN-T5-small` and `gemma_instruct_2b_en` models are supported.
 ### Steps to run this demo
 
 ``` bash
+# get the code
+git clone https://github.com/liferoad/beamllm.git
+cd beamllm
+
 # create venv for this demo
 make init
 # build customer container
@@ -59,9 +63,16 @@ Chat finished.
 
 ## Known Issues
 
-`FLAN-T5-small` needs `pytorch` while `gemma_instruct_2b_en` requires `Keras 3.0` and `Tensorflow 3.15`.
+`FLAN-T5-small` needs `pytorch` while `gemma_instruct_2b_en` requires `Keras 3.0` and `tensorflow 2.15`.
 Make all of these packages coexisting with a GPU container image is challenging.
 Right now, running on GPUs using Dataflow is broken. Running `gemma_instruct_2b_en` on CPUs is very slow.
+
+You also need to run `pip install -U keras>3` to manfully install `Keras 3.0` since it has conflicts with `tensorflow 2.15`:
+
+```bash
+ERROR: pip's dependency resolver does not currently take into account all the packages that are installed. This behaviour is the source of the following dependency conflicts.
+tensorflow 2.15.0.post1 requires keras<2.16,>=2.15.0, but you have keras 3.0.5 which is incompatible.
+```
 
 ## To Do
 
