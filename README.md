@@ -76,7 +76,6 @@ tensorflow 2.15.0.post1 requires keras<2.16,>=2.15.0, but you have keras 3.0.5 w
 
 ## To Do
 
-* Make GPUs working
 * Polish the interface to package everything with a CLI package
 * Support more built-in models
 * Support custom models
@@ -90,3 +89,4 @@ tensorflow 2.15.0.post1 requires keras<2.16,>=2.15.0, but you have keras 3.0.5 w
 * <https://cloud.google.com/dataflow/docs/machine-learning/gemma-run-inference>
 * <https://www.kaggle.com/models/google/gemma>
 * <https://www.tensorflow.org/install/source#gpu>
+* <https://pytorch.org/get-started/locally/>
