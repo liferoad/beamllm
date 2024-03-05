@@ -15,19 +15,14 @@
 # This needs Python 3.10 for your local runtime environment
 
 # Select an NVIDIA base image with desired GPU stack from https://ngc.nvidia.com/catalog/containers/nvidia:cuda
-FROM nvidia/cuda:12.3.2-cudnn9-runtime-ubuntu22.04
+FROM nvidia/cuda:12.2.2-cudnn8-runtime-ubuntu22.04
 
 WORKDIR /workspace
 
 COPY requirements.txt requirements.txt
 
 RUN \
-    # Add Deadsnakes repository that has a variety of Python packages for Ubuntu.
-    # See: https://launchpad.net/~deadsnakes/+archive/ubuntu/ppa
-    apt-key adv --keyserver keyserver.ubuntu.com --recv-keys F23C5A6CF475977595C89F51BA6932366A755776 \
-    && echo "deb http://ppa.launchpad.net/deadsnakes/ppa/ubuntu focal main" >> /etc/apt/sources.list.d/custom.list \
-    && echo "deb-src http://ppa.launchpad.net/deadsnakes/ppa/ubuntu focal main" >> /etc/apt/sources.list.d/custom.list \
-    && apt-get update \
+    apt-get update && apt upgrade -y \
     && apt-get install -y curl \
         python3.10 \
         python3.10-venv \
@@ -39,6 +34,7 @@ RUN \
     && curl https://bootstrap.pypa.io/get-pip.py | python \
     && pip install --upgrade pip \
     && pip install --no-cache-dir -r requirements.txt \
+    && pip install --no-cache-dir -U tensorflow[and-cuda] \
     && pip install --no-cache-dir -U keras>=3 \
     && pip install --no-cache-dir -U torch==2.2.1+cu121 torchvision==0.17.1+cu121 --index-url https://download.pytorch.org/whl/cu121
 

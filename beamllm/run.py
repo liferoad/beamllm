@@ -34,6 +34,7 @@ def parse_known_args(argv):
     parser.add_argument("--input", dest="input", required=True, help="Input pub/sub topic")
     parser.add_argument("--output", dest="output", required=True, help="Output pub/sub topic")
     parser.add_argument("--model_name", dest="model_name", required=True, help="LLM model name")
+    parser.add_argument("--max_response", dest="max_response", required=True, help="max response size")
     parser.add_argument(
         "--device",
         default="CPU",
@@ -52,7 +53,9 @@ def run(argv=None, save_main_session=True, test_pipeline=None) -> PipelineResult
     known_args, pipeline_args = parse_known_args(argv)
 
     # setup configs
-    model_config = ModelConfig(name=ModelName(known_args.model_name), device=known_args.device)
+    model_config = ModelConfig(
+        name=ModelName(known_args.model_name), device=known_args.device, max_response=known_args.max_response
+    )
     source_config = SourceConfig(input=known_args.input)
     sink_config = SinkConfig(output=known_args.output)
 

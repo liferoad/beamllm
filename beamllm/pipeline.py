@@ -98,7 +98,8 @@ def build_pipeline(pipeline, source_config: SourceConfig, sink_config: SinkConfi
         pred = (
             preprocess
             | "ConvertNumpyToTensor" >> beam.Map(lambda x: (x[0], tokenizer(x[1], return_tensors="pt").input_ids[0]))
-            | "RunInference" >> RunInference(model_handler, inference_args={"max_new_tokens": MAX_RESPONSE_TOKENS})
+            | "RunInference"
+            >> RunInference(model_handler, inference_args={"max_new_tokens": model_config.max_response})
             | "PostProcessPredictions" >> beam.ParDo(PredictionWithKeyProcessor(tokenizer))
         )
     elif model_config.name == ModelName.GEMMA_INSTRUCT_2B_EN:
@@ -115,7 +116,8 @@ def build_pipeline(pipeline, source_config: SourceConfig, sink_config: SinkConfi
 
         pred = (
             preprocess
-            | "RunInferenceGemma" >> RunInference(model_handler, inference_args={"max_length": 32})
+            | "RunInferenceGemma"
+            >> RunInference(model_handler, inference_args={"max_length": model_config.max_response})
             | "PostProcessPredictionsGemma" >> beam.ParDo(PredictionWithKeyProcessorGemma())
         )
     else:

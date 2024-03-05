@@ -19,5 +19,5 @@ transformers
 python-dotenv
 tensorflow
 tensorflow-hub
-keras_nlp==0.8.0
+keras_nlp
 keras

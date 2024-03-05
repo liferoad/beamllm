@@ -31,10 +31,11 @@ model_location = {
 
 
 class ModelConfig(BaseModel):
-    name: ModelName = Field(ModelName.FLAN_T5_SMALL, description="LLM model name")
+    name: ModelName = Field(ModelName.GEMMA_INSTRUCT_2B_EN, description="LLM model name")
     device: str = Field("CPU", description="Device to be used on the Runner. Choices are (CPU, GPU)")
     min_batch_size: int = 10
     max_batch_size: int = 100
+    max_response: int = 256
 
 
 class SourceConfig(BaseModel):

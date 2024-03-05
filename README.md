@@ -45,7 +45,11 @@ make run-chat
 [pipeline.py](https://github.com/liferoad/beamllm/blob/main/beamllm/pipeline.py) defines the Beam pipeline.
 [config.py](https://github.com/liferoad/beamllm/blob/main/beamllm/config.py) configures the model information.
 
-[chat.py](https://github.com/liferoad/beamllm/blob/main/beamllm/chat.py) provides a simple chat interface. It basically publishes the user's message to the input Pub/Sub topic by adding one unique session id and keeps listening the response from the output topic. One example output is,
+[chat.py](https://github.com/liferoad/beamllm/blob/main/beamllm/chat.py) provides a simple chat interface. It basically publishes the user's message to the input Pub/Sub topic by adding one unique session id and keeps listening the response from the output topic.
+
+Note in order to run `gemma_instruct_2b_en`, `g2-standard-4` with L4 GPUs must be used.
+
+One example output from `FLAN-T5-small` is,
 
 ```bash
 Listening for messages on projects/apache-beam-testing/subscriptions/llm_output-32555ae3-e8b1-4977-a7db-015f22ee2c51..
@@ -59,19 +63,6 @@ Bot 32555ae3-e8b1-4977-a7db-015f22ee2c51: a blue sky
 Enter message to chat (Ctrl-Break to exit): ^CExiting...
 Subscription deleted: projects/apache-beam-testing/subscriptions/llm_output-32555ae3-e8b1-4977-a7db-015f22ee2c51.
 Chat finished.
-```
-
-## Known Issues
-
-`FLAN-T5-small` needs `pytorch` while `gemma_instruct_2b_en` requires `Keras 3.0` and `tensorflow 2.15`.
-Make all of these packages coexisting with a GPU container image is challenging.
-Right now, running on GPUs using Dataflow is broken. Running `gemma_instruct_2b_en` on CPUs is very slow.
-
-You also need to run `pip install -U keras>3` to manfully install `Keras 3.0` since it has conflicts with `tensorflow 2.15`:
-
-```bash
-ERROR: pip's dependency resolver does not currently take into account all the packages that are installed. This behaviour is the source of the following dependency conflicts.
-tensorflow 2.15.0.post1 requires keras<2.16,>=2.15.0, but you have keras 3.0.5 which is incompatible.
 ```
 
 ## To Do
@@ -90,3 +81,5 @@ tensorflow 2.15.0.post1 requires keras<2.16,>=2.15.0, but you have keras 3.0.5 w
 * <https://www.kaggle.com/models/google/gemma>
 * <https://www.tensorflow.org/install/source#gpu>
 * <https://pytorch.org/get-started/locally/>
+* <https://catalog.ngc.nvidia.com/orgs/nvidia/containers/cuda/tags>
+* <https://www.tensorflow.org/install/pip>
