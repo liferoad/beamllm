@@ -95,6 +95,7 @@ run-cpu: ## Run a Dataflow job with CPUs
 	--sdk_location container \
 	--experiments=use_pubsub_streaming \
 	--model_name $(MODEL_NAME) \
+	--max_response $(MAX_RESPONSE) \
 	--input projects/$(PROJECT_ID)/topics/$(INPUT_TOPIC) \
 	--output projects/$(PROJECT_ID)/topics/$(OUTPUT_TOPIC)
 
@@ -118,6 +119,7 @@ run-gpu: ## Run a Dataflow job with GPUs
 	--sdk_location container \
 	--experiments=use_pubsub_streaming \
 	--model_name $(MODEL_NAME) \
+	--max_response $(MAX_RESPONSE) \
 	--input projects/$(PROJECT_ID)/topics/$(INPUT_TOPIC) \
 	--output projects/$(PROJECT_ID)/topics/$(OUTPUT_TOPIC)
 
