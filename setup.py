@@ -27,5 +27,5 @@ setuptools.setup(
     name="beamllm",
     version="0.0.1",
     install_requires=required,
-    packages=["beamllm"],
+    packages=setuptools.find_packages(),
 )

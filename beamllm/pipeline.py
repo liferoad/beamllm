@@ -41,7 +41,7 @@ def build_pipeline(
 
     llm = model_factory.get_model(model_config.name)
 
-    llm.load_model()
+    llm.load_model(model_config)
 
     # preprocess pub/sub messages
     preprocess = (
