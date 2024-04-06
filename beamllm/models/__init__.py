@@ -11,21 +11,3 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
-# standard libraries
-import os
-
-# third party libraries
-import setuptools
-
-required = []
-if os.path.exists("requirements.txt"):
-    with open("requirements.txt") as f:
-        required = f.read().splitlines()
-
-setuptools.setup(
-    name="beamllm",
-    version="0.0.1",
-    install_requires=required,
-    packages=setuptools.find_packages(),
-)

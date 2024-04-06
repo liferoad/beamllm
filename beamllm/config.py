@@ -24,12 +24,6 @@ class ModelName(str, Enum):
     GEMMA_INSTRUCT_2B_EN = "gemma_instruct_2b_en"
 
 
-model_location = {
-    ModelName.FLAN_T5_SMALL: "gs://xqhu-ml/llm-models/flan-t5-small.pt",
-    ModelName.GEMMA_INSTRUCT_2B_EN: "gs://xqhu-ml/llm-models/gemma_instruct_2b_en.keras",
-}
-
-
 class ModelConfig(BaseModel):
     name: ModelName = Field(ModelName.GEMMA_INSTRUCT_2B_EN, description="LLM model name")
     device: str = Field("CPU", description="Device to be used on the Runner. Choices are (CPU, GPU)")

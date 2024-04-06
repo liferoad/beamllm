@@ -25,6 +25,8 @@ from apache_beam.runners.runner import PipelineResult
 
 # Beam LLM
 from beamllm.config import ModelConfig, ModelName, SinkConfig, SourceConfig
+from beamllm.models.factory import LLMFactory
+from beamllm.models.flan_t5 import FlanT5
 from beamllm.pipeline import build_pipeline
 
 
@@ -68,8 +70,18 @@ def run(argv=None, save_main_session=True, test_pipeline=None) -> PipelineResult
     if not test_pipeline:
         pipeline = beam.Pipeline(options=pipeline_options)
 
+    # register LLMs
+    factory = LLMFactory()
+    factory.register_model("FLAN-T5-small", FlanT5())
+
     # build the pipeline using configs
-    build_pipeline(pipeline, source_config=source_config, sink_config=sink_config, model_config=model_config)
+    build_pipeline(
+        pipeline,
+        source_config=source_config,
+        sink_config=sink_config,
+        model_config=model_config,
+        model_factory=factory,
+    )
 
     # run it
     result = pipeline.run()
