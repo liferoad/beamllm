@@ -19,7 +19,10 @@ FROM nvidia/cuda:12.2.2-cudnn8-runtime-ubuntu22.04
 
 WORKDIR /workspace
 
-COPY requirements.txt requirements.txt
+COPY requirements_gemma_2b.txt requirements.txt
+COPY setup.py /workspace/
+COPY pyproject.toml /workspace/
+COPY beamllm /workspace/
 
 RUN \
     apt-get update && apt upgrade -y \
@@ -34,9 +37,16 @@ RUN \
     && curl https://bootstrap.pypa.io/get-pip.py | python \
     && pip install --upgrade pip \
     && pip install --no-cache-dir -r requirements.txt \
-    && pip install --no-cache-dir -U tensorflow[and-cuda] \
-    && pip install --no-cache-dir -U keras>=3 \
-    && pip install --no-cache-dir -U torch==2.2.1+cu121 torchvision==0.17.1+cu121 --index-url https://download.pytorch.org/whl/cu121
+    && pip install --no-cache-dir -e . \
+    && rm -f requirements.txt
+
+# clean up
+RUN rm -fr setup.py pyproject.toml beamllm
+
+# Copy model
+COPY model_files/gemma_instruct_2b_en.keras /workspace/
+
+ENV KERAS_BACKEND="tensorflow"
 
 # Copy files from official SDK image, including script/dependencies.
 COPY --from=apache/beam_python3.10_sdk:${BEAM_VERSION} /opt/apache/beam /opt/apache/beam

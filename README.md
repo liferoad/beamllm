@@ -17,6 +17,7 @@ Each message is associated with a chat session id, which guarantees the receiver
 
 ### Prerequisites
 
+* Python 3.10 (to support both Tensorflow and Pytorch in the containers)
 * Tools: conda, git, make, docker, gcloud, python3-venv
 * Access to a GCP project
 

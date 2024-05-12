@@ -18,6 +18,9 @@ beam-output/
 Dockerfile
 requirements.txt
 
+# model temp
+model_files
+
 # sys
 .DS_Store
 

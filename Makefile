@@ -74,30 +74,21 @@ clean: clean-lite ## Remove virtual environment, downloaded models, etc
 	@rm -rf venv
 	@echo "run 'make init'"
 
-docker: ## Build a custom docker image and push it to Artifact Registry
-	@$(shell sed "s|\$${BEAM_VERSION}|$(BEAM_VERSION)|g; s|\$${PYTHON_VERSION}|$(PYTHON_VERSION)|g" ${DOCKERFILE_TEMPLATE} > Dockerfile)
-	docker build --platform linux/amd64 -t $(CUSTOM_CONTAINER_IMAGE) -f Dockerfile .
-	docker push $(CUSTOM_CONTAINER_IMAGE)
+docker_t5: ## Build the docker with the t5 model and push it to Artifact Registry
+	$(shell sed "s|\$${BEAM_VERSION}|$(BEAM_VERSION)|g; s|\$${PYTHON_VERSION}|$(PYTHON_VERSION)|g" containers/flan_t5/flan_t5_small_gpu.Dockerfile > Dockerfile)
+	@rm -f requirements_t5.txt
+	@sed "s|\$${BEAM_VERSION}|$(BEAM_VERSION)|g" containers/flan_t5/requirements_t5.txt > requirements_t5.txt
+	docker build --platform linux/amd64 -t $(CUSTOM_CONTAINER_IMAGE_ROOT)/flan_t5_small:gpu -f Dockerfile .
+	docker push $(CUSTOM_CONTAINER_IMAGE_ROOT)/flan_t5_small:gpu
+	@rm -f requirements_t5.txt
 
-run-cpu: ## Run a Dataflow job with CPUs
-	$(eval JOB_NAME := beam-llm-$(shell date +%s)-$(shell echo $$$$))
-	time ./venv/bin/python3 -m beamllm.run \
-	--runner DataflowRunner \
-	--job_name $(JOB_NAME) \
-	--project $(PROJECT_ID) \
-	--region $(REGION) \
-	--machine_type $(MACHINE_TYPE) \
-	--disk_size_gb $(DISK_SIZE_GB) \
-	--staging_location $(STAGING_LOCATION) \
-	--temp_location $(TEMP_LOCATION) \
-	--setup_file ./setup.py \
-	--sdk_container_image $(CUSTOM_CONTAINER_IMAGE) \
-	--sdk_location container \
-	--experiments=use_pubsub_streaming \
-	--model_name $(MODEL_NAME) \
-	--max_response $(MAX_RESPONSE) \
-	--input projects/$(PROJECT_ID)/topics/$(INPUT_TOPIC) \
-	--output projects/$(PROJECT_ID)/topics/$(OUTPUT_TOPIC)
+docker_gemma_2b: ## Build the docker with the gemma 2b model and push it to Artifact Registry
+	$(shell sed "s|\$${BEAM_VERSION}|$(BEAM_VERSION)|g; s|\$${PYTHON_VERSION}|$(PYTHON_VERSION)|g" containers/gemma_2b/gemma_2b_gpu.Dockerfile > Dockerfile)
+	@rm -f requirements_gemma_2b.txt
+	@sed "s|\$${BEAM_VERSION}|$(BEAM_VERSION)|g" containers/gemma_2b/requirements_gemma_2b.txt > requirements_gemma_2b.txt
+	docker build --platform linux/amd64 -t $(CUSTOM_CONTAINER_IMAGE_ROOT)/gemma_2b:gpu -f Dockerfile .
+	docker push $(CUSTOM_CONTAINER_IMAGE_ROOT)/gemma_2b:gpu
+	@rm -f requirements_gemma_2b.txt
 
 run-gpu: ## Run a Dataflow job with GPUs
 	$(eval JOB_NAME := beam-llm-$(shell date +%s)-$(shell echo $$$$))
@@ -115,7 +106,7 @@ run-gpu: ## Run a Dataflow job with GPUs
 	--dataflow_service_option $(SERVICE_OPTIONS) \
 	--number_of_worker_harness_threads 1 \
 	--experiments=disable_worker_container_image_prepull \
-	--sdk_container_image $(CUSTOM_CONTAINER_IMAGE) \
+	--sdk_container_image $(CUSTOM_CONTAINER_IMAGE_ROOT)/$(MODEL_TAG) \
 	--sdk_location container \
 	--experiments=use_pubsub_streaming \
 	--model_name $(MODEL_NAME) \

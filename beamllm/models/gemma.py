@@ -29,8 +29,8 @@ def gemma_inference_function(model, batch, inference_args, model_id):
 class Gemma(LLM):
     def __init__(
         self,
-        name="google/flan-t5-small",
-        path="gs://xqhu-ml/llm-models/gemma_instruct_2b_en.keras",
+        name="gemma_instruct_2b_en",
+        path="gemma_instruct_2b_en.keras",
     ):
         """Only init model information here"""
         self._name = name

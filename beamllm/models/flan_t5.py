@@ -30,7 +30,7 @@ class FlanT5(LLM):
     def __init__(
         self,
         name="google/flan-t5-small",
-        path="gs://xqhu-ml/llm-models/flan-t5-small.pt",
+        path="flan-t5-small.pt",
     ):
         """Only init model information here"""
         self._name = name

@@ -26,7 +26,6 @@ from apache_beam.runners.runner import PipelineResult
 # Beam LLM
 from beamllm.config import ModelConfig, ModelName, SinkConfig, SourceConfig
 from beamllm.models.factory import LLMFactory
-from beamllm.models.flan_t5 import FlanT5
 from beamllm.pipeline import build_pipeline
 
 
@@ -72,7 +71,23 @@ def run(argv=None, save_main_session=True, test_pipeline=None) -> PipelineResult
 
     # register LLMs
     factory = LLMFactory()
-    factory.register_model("FLAN-T5-small", FlanT5())
+
+    # local import
+    try:
+        # Beam LLM
+        from beamllm.models.flan_t5 import FlanT5
+
+        factory.register_model("FLAN-T5-small", FlanT5())
+    except:  # noqa
+        logging.warn("cannot load FlanT5")
+
+    try:
+        # Beam LLM
+        from beamllm.models.gemma import Gemma
+
+        factory.register_model("gemma_instruct_2b_en", Gemma())
+    except:  # noqa
+        logging.warn("cannot load Gemma")
 
     # build the pipeline using configs
     build_pipeline(
