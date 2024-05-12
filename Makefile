@@ -74,13 +74,21 @@ clean: clean-lite ## Remove virtual environment, downloaded models, etc
 	@rm -rf venv
 	@echo "run 'make init'"
 
-docker_t5: ## Build all dockers and push them to Artifact Registry
+docker_t5: ## Build the docker with the t5 model and push it to Artifact Registry
 	$(shell sed "s|\$${BEAM_VERSION}|$(BEAM_VERSION)|g; s|\$${PYTHON_VERSION}|$(PYTHON_VERSION)|g" containers/flan_t5/flan_t5_small_gpu.Dockerfile > Dockerfile)
 	@rm -f requirements_t5.txt
-	sed "s|\$${BEAM_VERSION}|$(BEAM_VERSION)|g" containers/flan_t5/requirements_t5.txt > requirements_t5.txt
+	@sed "s|\$${BEAM_VERSION}|$(BEAM_VERSION)|g" containers/flan_t5/requirements_t5.txt > requirements_t5.txt
 	docker build --platform linux/amd64 -t $(CUSTOM_CONTAINER_IMAGE_ROOT)/flan_t5_small:gpu -f Dockerfile .
 	docker push $(CUSTOM_CONTAINER_IMAGE_ROOT)/flan_t5_small:gpu
 	@rm -f requirements_t5.txt
+
+docker_gemma_2b: ## Build the docker with the gemma 2b model and push it to Artifact Registry
+	$(shell sed "s|\$${BEAM_VERSION}|$(BEAM_VERSION)|g; s|\$${PYTHON_VERSION}|$(PYTHON_VERSION)|g" containers/gemma_2b/gemma_2b_gpu.Dockerfile > Dockerfile)
+	@rm -f requirements_gemma_2b.txt
+	@sed "s|\$${BEAM_VERSION}|$(BEAM_VERSION)|g" containers/gemma_2b/requirements_gemma_2b.txt > requirements_gemma_2b.txt
+	docker build --platform linux/amd64 -t $(CUSTOM_CONTAINER_IMAGE_ROOT)/gemma_2b:gpu -f Dockerfile .
+	docker push $(CUSTOM_CONTAINER_IMAGE_ROOT)/gemma_2b:gpu
+	@rm -f requirements_gemma_2b.txt
 
 run-gpu: ## Run a Dataflow job with GPUs
 	$(eval JOB_NAME := beam-llm-$(shell date +%s)-$(shell echo $$$$))
