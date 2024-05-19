@@ -44,7 +44,7 @@ RUN \
 RUN rm -fr setup.py pyproject.toml beamllm
 
 # Copy model
-COPY model_files/gemma_instruct_2b_en.keras /workspace/
+COPY model_files/gemma_instruct_2b_en /workspace/gemma_instruct_2b_en
 
 ENV KERAS_BACKEND="tensorflow"
 

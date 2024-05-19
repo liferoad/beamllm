@@ -1,9 +1,13 @@
+# standard libraries
+from collections.abc import Iterable, Sequence
+from typing import Any, Optional
+
 # third party libraries
 import apache_beam as beam
-import numpy as np
+import keras_nlp
 from apache_beam.ml.inference import utils
-from apache_beam.ml.inference.base import KeyedModelHandler, RunInference
-from apache_beam.ml.inference.tensorflow_inference import TFModelHandlerNumpy
+from apache_beam.ml.inference.base import KeyedModelHandler, ModelHandler, PredictionResult, RunInference
+from keras_nlp.src.models.gemma.gemma_causal_lm import GemmaCausalLM
 
 # Beam LLM
 from beamllm.config import ModelConfig
@@ -18,19 +22,56 @@ class PredictionWithKeyProcessorGemma(beam.DoFn):
         yield (key, output_value)
 
 
-def gemma_inference_function(model, batch, inference_args, model_id):
-    vectorized_batch = np.stack(batch, axis=0)
-    # The only inference_arg expected here is a max_length parameter to
-    # determine how many words are included in the output.
-    predictions = model.generate(vectorized_batch, **inference_args)
-    return utils._convert_to_result(batch, predictions, model_id)
+class GemmaModelHandler(ModelHandler[str, PredictionResult, GemmaCausalLM]):
+    def __init__(self, model_name: str = "gemma_2B", inference_args: Optional[dict[str, Any]] = None):
+        """Implementation of the ModelHandler interface for Gemma using text as input.
+
+        https://github.com/GoogleCloudPlatform/python-docs-samples/blob/main/dataflow/gemma/custom_model_gemma.py
+
+        Args:
+          model_name: The Gemma model name. Default is gemma_2B.
+        """
+        self._model_name = model_name
+        self._inference_args = inference_args
+        self._env_vars = {}
+
+    def share_model_across_processes(self) -> bool:
+        """Indicates if the model should be loaded once-per-VM rather than
+        once-per-worker-process on a VM. Because Gemma is a large language model,
+        this will always return True to avoid OOM errors.
+        """
+        return True
+
+    def load_model(self) -> GemmaCausalLM:
+        """Loads and initializes a model for processing."""
+        return keras_nlp.models.GemmaCausalLM.from_preset(self._model_name)
+
+    def run_inference(
+        self, batch: Sequence[str], model: GemmaCausalLM, inference_args: Optional[dict[str, Any]] = None
+    ) -> Iterable[PredictionResult]:
+        """Runs inferences on a batch of text strings.
+
+        Args:
+          batch: A sequence of examples as text strings.
+          model: The Gemma model being used.
+          inference_args: Any additional arguments for an inference.
+
+        Returns:
+          An Iterable of type PredictionResult.
+        """
+        # Loop each text string, and use a tuple to store the inference results.
+        predictions = []
+        for one_text in batch:
+            result = model.generate(one_text, **self._inference_args)
+            predictions.append(result)
+        return utils._convert_to_result(batch, predictions, self._model_name)
 
 
 class Gemma(LLM):
     def __init__(
         self,
         name="gemma_instruct_2b_en",
-        path="gemma_instruct_2b_en.keras",
+        path="/workspace/gemma_instruct_2b_en",
     ):
         """Only init model information here"""
         self._name = name
@@ -42,15 +83,13 @@ class Gemma(LLM):
 
         # Specify the model handler, providing a path and the custom inference function.
         self._model_handler = KeyedModelHandler(
-            TFModelHandlerNumpy(
-                self._path,
-                inference_fn=gemma_inference_function,
-                device=model_config.device,
-                large_model=True,
+            GemmaModelHandler(
+                model_name=self._path,
+                inference_args=self._inference_args,
             )
         )
 
     def get_pipeline(self):
-        return "RunInferenceGemma" >> RunInference(
-            self._model_handler, inference_args=self._inference_args
-        ) | "PostProcessPredictionsGemma" >> beam.ParDo(PredictionWithKeyProcessorGemma())
+        return "RunInferenceGemma" >> RunInference(self._model_handler) | "PostProcessPredictionsGemma" >> beam.ParDo(
+            PredictionWithKeyProcessorGemma()
+        )
