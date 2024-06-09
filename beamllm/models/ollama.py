@@ -45,10 +45,10 @@ class OllamaModelHandler(ModelHandler[str, PredictionResult, MyDict]):
     def load_model(self) -> MyDict:
         """Loads and initializes a model for processing."""
         ollama.pull(self._model_name)
-        return ollama.show(self._model_name)
+        return MyDict(ollama.show(self._model_name))
 
     def run_inference(
-        self, batch: Sequence[str], model: str, inference_args: Optional[Dict[str, Any]] = None
+        self, batch: Sequence[str], model: MyDict, inference_args: Optional[Dict[str, Any]] = None
     ) -> Iterable[PredictionResult]:
         """Runs inferences on a batch of text strings.
 
@@ -72,7 +72,7 @@ class OllamaModelHandler(ModelHandler[str, PredictionResult, MyDict]):
                     },
                 ],
             )
-            predictions.append([response["message"]["content"]])
+            predictions.append(response["message"]["content"])
         return [PredictionResult(x, y) for x, y in zip(batch, predictions)]
 
 
@@ -97,6 +97,6 @@ class Ollama(LLM):
         )
 
     def get_pipeline(self):
-        return "RunInferenceGemma" >> RunInference(self._model_handler) | "PostProcessPredictionsGemma" >> beam.ParDo(
+        return "RunInferenceOllama" >> RunInference(self._model_handler) | "PostProcessPredictionsOllama" >> beam.ParDo(
             PredictionWithKeyProcessorOllama()
         )
