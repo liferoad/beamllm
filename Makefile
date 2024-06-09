@@ -90,7 +90,7 @@ docker_gemma_2b: ## Build the docker with the gemma 2b model and push it to Arti
 	docker push $(CUSTOM_CONTAINER_IMAGE_ROOT)/gemma_2b:gpu
 	@rm -f requirements_gemma_2b.txt
 
-docker_ollama: ## Build the docker with ollama and llama3 and push it to Artifact Registry
+docker_ollama: ## Build the docker with ollama and push it to Artifact Registry
 	$(shell sed "s|\$${BEAM_VERSION}|$(BEAM_VERSION)|g; s|\$${PYTHON_VERSION}|$(PYTHON_VERSION)|g" containers/ollama/ollama.Dockerfile > Dockerfile)
 	@rm -f requirements_ollama.txt
 	@sed "s|\$${BEAM_VERSION}|$(BEAM_VERSION)|g" containers/ollama/requirements_ollama.txt > requirements_ollama.txt

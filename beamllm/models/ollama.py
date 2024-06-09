@@ -20,7 +20,12 @@ class PredictionWithKeyProcessorOllama(beam.DoFn):
         yield (key, output_value)
 
 
-class OllamaModelHandler(ModelHandler[str, PredictionResult, dict]):
+# avoid "cannot create weak reference to 'dict' object"
+class MyDict(dict):
+    pass
+
+
+class OllamaModelHandler(ModelHandler[str, PredictionResult, MyDict]):
     def __init__(
         self,
         model_name: str = "llama3",
@@ -37,7 +42,7 @@ class OllamaModelHandler(ModelHandler[str, PredictionResult, dict]):
         self._model_name = model_name
         self._env_vars = {}
 
-    def load_model(self) -> dict:
+    def load_model(self) -> MyDict:
         """Loads and initializes a model for processing."""
         ollama.pull(self._model_name)
         return ollama.show(self._model_name)
