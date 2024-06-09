@@ -22,6 +22,7 @@ from pydantic import BaseModel, Field
 class ModelName(str, Enum):
     FLAN_T5_SMALL = "FLAN-T5-small"
     GEMMA_INSTRUCT_2B_EN = "gemma_instruct_2b_en"
+    OLLAMA = "ollama"
 
 
 class ModelConfig(BaseModel):
@@ -30,6 +31,7 @@ class ModelConfig(BaseModel):
     min_batch_size: int = 10
     max_batch_size: int = 100
     max_response: int = 256
+    ollama_model_name: str = Field("llama3", description="ollama model name")
 
 
 class SourceConfig(BaseModel):
