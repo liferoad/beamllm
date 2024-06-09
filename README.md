@@ -35,10 +35,14 @@ cd beamllm
 
 # create venv for this demo
 make init
-# build customer container
-make docker
+# build customer container that contains the t5 model
+make docker_t5
+# build customer container that contains the gemma_2b model
+make docker_gemma_2b
+# build customer container that contains the ollama model support
+make docker_ollama
 # deploy a LLM model using Dataflow
-make run-cpu
+make run-gpu
 # chat with the model
 make run-chat
 ```
@@ -106,11 +110,26 @@ Here are some of the use cases for Apache Beam:
 * **Data analysis:** Beam can be used to analyze data by performing various operations
 ```
 
+### Run the Ollama models (Recommended)
+
+With `make docker_ollama`, the custom container is built on top of the ollama container to run the streaming Beam pipeline.
+`beamllm/models/ollama.py` creates a customer ollama model handler, which allows users to specify any supported ollama models.
+The default model is `llama3`.
+
+Note since ollama needs to download the model on the fly, Dataflow workers should be able to connect the internet.
+
+One example output for `ollama` with `llama3` is,
+
+```bash
+Listening for messages on projects/apache-beam-testing/subscriptions/llm_output-f39cef17-0d4b-4dc6-8460-fd6005a9a553..
+
+Enter message to chat (Ctrl-Break to exit): why is the sky blue in one sentence?
+Bot f39cef17-0d4b-4dc6-8460-fd6005a9a553: The sky appears blue because of a phenomenon called Rayleigh scattering, where shorter blue wavelengths of sunlight are scattered more efficiently by tiny molecules of gases in the Earth's atmosphere, making them more visible to our eyes than longer red and orange wavelengths.
+```
+
 ## To Do
 
 * Polish the interface to package everything with a CLI package
-* Support more built-in models
-* Support custom models
 * Polish the chat client
 
 ## Links

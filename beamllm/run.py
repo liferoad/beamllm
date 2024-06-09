@@ -41,6 +41,7 @@ def parse_known_args(argv):
         default="CPU",
         help="Device to be used on the Runner. Choices are (CPU, GPU).",
     )
+    parser.add_argument("--ollama_model_name", default="llama3", dest="ollama_model_name", help="ollama model name"),
     return parser.parse_known_args(argv)
 
 
@@ -55,7 +56,10 @@ def run(argv=None, save_main_session=True, test_pipeline=None) -> PipelineResult
 
     # setup configs
     model_config = ModelConfig(
-        name=ModelName(known_args.model_name), device=known_args.device, max_response=known_args.max_response
+        name=ModelName(known_args.model_name),
+        device=known_args.device,
+        max_response=known_args.max_response,
+        ollama_model_name=known_args.ollama_model_name,
     )
     source_config = SourceConfig(input=known_args.input)
     sink_config = SinkConfig(output=known_args.output)
@@ -88,6 +92,14 @@ def run(argv=None, save_main_session=True, test_pipeline=None) -> PipelineResult
         factory.register_model("gemma_instruct_2b_en", Gemma())
     except:  # noqa
         logging.warn("cannot load Gemma")
+
+    try:
+        # Beam LLM
+        from beamllm.models.ollama import Ollama
+
+        factory.register_model("ollama", Ollama())
+    except:  # noqa
+        logging.warn("cannot load Ollama")
 
     # build the pipeline using configs
     build_pipeline(
