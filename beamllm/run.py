@@ -41,9 +41,7 @@ def parse_known_args(argv):
         default="CPU",
         help="Device to be used on the Runner. Choices are (CPU, GPU).",
     )
-    parser.add_argument(
-        "--ollama_model_name", default="llama3", dest="ollama_model_name", required=True, help="ollama model name"
-    ),
+    parser.add_argument("--ollama_model_name", default="llama3", dest="ollama_model_name", help="ollama model name"),
     return parser.parse_known_args(argv)
 
 

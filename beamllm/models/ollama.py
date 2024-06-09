@@ -20,7 +20,7 @@ class PredictionWithKeyProcessorOllama(beam.DoFn):
         yield (key, output_value)
 
 
-class OllamaModelHandler(ModelHandler[str, PredictionResult, str]):
+class OllamaModelHandler(ModelHandler[str, PredictionResult, dict]):
     def __init__(
         self,
         model_name: str = "llama3",
@@ -37,7 +37,7 @@ class OllamaModelHandler(ModelHandler[str, PredictionResult, str]):
         self._model_name = model_name
         self._env_vars = {}
 
-    def load_model(self) -> str:
+    def load_model(self) -> dict:
         """Loads and initializes a model for processing."""
         ollama.pull(self._model_name)
         return ollama.show(self._model_name)

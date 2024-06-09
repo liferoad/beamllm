@@ -119,6 +119,7 @@ run-gpu: ## Run a Dataflow job with GPUs
 	--experiments=use_pubsub_streaming \
 	--model_name $(MODEL_NAME) \
 	--max_response $(MAX_RESPONSE) \
+	--ollama_model_name $(OLLAMA_MODEL_NAME) \
 	--input projects/$(PROJECT_ID)/topics/$(INPUT_TOPIC) \
 	--output projects/$(PROJECT_ID)/topics/$(OUTPUT_TOPIC)
 
