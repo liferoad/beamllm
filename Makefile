@@ -90,6 +90,14 @@ docker_gemma_2b: ## Build the docker with the gemma 2b model and push it to Arti
 	docker push $(CUSTOM_CONTAINER_IMAGE_ROOT)/gemma_2b:gpu
 	@rm -f requirements_gemma_2b.txt
 
+docker_ollama: ## Build the docker with ollama and llama3 and push it to Artifact Registry
+	$(shell sed "s|\$${BEAM_VERSION}|$(BEAM_VERSION)|g; s|\$${PYTHON_VERSION}|$(PYTHON_VERSION)|g" containers/ollama/ollama.Dockerfile > Dockerfile)
+	@rm -f requirements_ollama.txt
+	@sed "s|\$${BEAM_VERSION}|$(BEAM_VERSION)|g" containers/ollama/requirements_ollama.txt > requirements_ollama.txt
+	docker build --platform linux/amd64 -t $(CUSTOM_CONTAINER_IMAGE_ROOT)/ollama:latest -f Dockerfile .
+	docker push $(CUSTOM_CONTAINER_IMAGE_ROOT)/ollama:latest
+	@rm -f requirements_ollama.txt
+
 run-gpu: ## Run a Dataflow job with GPUs
 	$(eval JOB_NAME := beam-llm-$(shell date +%s)-$(shell echo $$$$))
 	time ./venv/bin/python3 -m beamllm.run \
