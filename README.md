@@ -1,17 +1,21 @@
+
 # Beam LLM
 
 Bring your LLM models to production with `beamllm`.
 
-Note This project uses the [Dataflow ML Starter project](https://github.com/google/dataflow-ml-starter) as the template.
+> **Note:** This project uses the [Dataflow ML Starter project](https://github.com/google/dataflow-ml-starter) as the template.
 
-The Beam pipeline to deploy a LLM model using Dataflow is:
+The Beam pipeline to deploy an LLM model using Dataflow is:
 
-```bash
-Read messages from Pub/Sub ----> Pre-process messages ----> RunInference with LLMs
-----> Post-process messages ----> Write messages to Pub/Sub
+```mermaid
+graph TD
+    A[Read messages from Pub/Sub] --> B{Pre-process messages}
+    B --> C{RunInference with LLMs}
+    C --> D{Post-process messages}
+    D --> E[Write messages to Pub/Sub]
 ```
 
-Each message is associated with a chat session id, which guarantees the receiver only gets the messages for the corresponding session.
+Each message is associated with a chat session ID, which guarantees the receiver only gets the messages for the corresponding session.
 
 ## How to run
 
@@ -23,38 +27,59 @@ Each message is associated with a chat session id, which guarantees the receiver
 
 ### Modify `.env`
 
-Only `FLAN-T5-small` and `gemma_instruct_2b_en` models are supported.
+`FLAN-T5-small`, `gemma_instruct_2b_en`, and `ollama` models are supported.
 `INPUT_TOPIC` and `OUTPUT_TOPIC` define two Pub/Sub topics for message ins and outs.
 
 ### Steps to run this demo
 
-``` bash
-# get the code
+#### 1. Get the code
+
+```bash
 git clone https://github.com/liferoad/beamllm.git
 cd beamllm
+```
 
-# create venv for this demo
+#### 2. Set up the environment
+
+```bash
+# Create venv for this demo
 make init
-# build customer container that contains the t5 model
+# Build custom container that contains the T5 model
 make docker_t5
-# build customer container that contains the gemma_2b model
+# Build custom container that contains the gemma_2b model
 make docker_gemma_2b
-# build customer container that contains the ollama model support
+# Build custom container that contains the ollama model support
 make docker_ollama
-# deploy a LLM model using Dataflow
+```
+
+#### 3. Deploy and interact with the model
+
+```bash
+# Deploy an LLM model using Dataflow
 make run-gpu
-# chat with the model
+# Chat with the model
 make run-chat
 ```
 
-[pipeline.py](https://github.com/liferoad/beamllm/blob/main/beamllm/pipeline.py) defines the Beam pipeline.
-[config.py](https://github.com/liferoad/beamllm/blob/main/beamllm/config.py) configures the model information.
+### Code Structure
 
-[chat.py](https://github.com/liferoad/beamllm/blob/main/beamllm/chat.py) provides a simple chat interface. It basically publishes the user's message to the input Pub/Sub topic by adding one unique session id and keeps listening the response from the output topic.
+#### beamllm
 
-Note in order to run `gemma_instruct_2b_en`, `g2-standard-4` with L4 GPUs must be used.
+* [pipeline.py](https://github.com/liferoad/beamllm/blob/main/beamllm/pipeline.py) defines the Beam pipeline.
+* [config.py](https://github.com/liferoad/beamllm/blob/main/beamllm/config.py) configures the model information.
+* [chat.py](https://github.com/liferoad/beamllm/blob/main/beamllm/chat.py) provides a simple chat interface. It publishes the user's message to the input Pub/Sub topic by adding a unique session ID and keeps listening for the response from the output topic.
 
-One example output from `FLAN-T5-small` is,
+> **Note:** In order to run `gemma_instruct_2b_en`, `g2-standard-4` with L4 GPUs must be used.
+
+#### models
+
+* flan_t5.py: handles the FLAN-T5-small model.
+* gemma.py: Handles the gemma_instruct_2b_en model.
+* ollama.py: Handles the Ollama models
+
+### Examples
+
+#### FLAN-T5-small
 
 ```bash
 Listening for messages on projects/apache-beam-testing/subscriptions/llm_output-32555ae3-e8b1-4977-a7db-015f22ee2c51..
@@ -70,7 +95,7 @@ Subscription deleted: projects/apache-beam-testing/subscriptions/llm_output-3255
 Chat finished.
 ```
 
-Another example output for `gemma_instruct_2b_en` is,
+#### gemma_instruct_2b_en
 
 ```bash
 Listening for messages on projects/apache-beam-testing/subscriptions/llm_output-d72a5af2-7d81-4ded-aa94-b602931c4d9d..
@@ -112,13 +137,13 @@ Here are some of the use cases for Apache Beam:
 
 ### Run the Ollama models (Recommended)
 
-With `make docker_ollama`, the custom container is built on top of the ollama container to run the streaming Beam pipeline.
-`beamllm/models/ollama.py` creates a customer ollama model handler, which allows users to specify any supported ollama models.
+With `make docker_ollama`, the custom container is built on top of the Ollama container to run the streaming Beam pipeline.
+`beamllm/models/ollama.py` creates a custom Ollama model handler, which allows users to specify any supported Ollama models.
 The default model is `llama3`.
 
-Note since ollama needs to download the model on the fly, Dataflow workers should be able to connect the internet.
+> **Note:** Since Ollama needs to download the model on the fly, Dataflow workers should be able to connect to the internet.
 
-One example output for `ollama` with `llama3` is,
+One example output for `ollama` with `llama3` is:
 
 ```bash
 Listening for messages on projects/apache-beam-testing/subscriptions/llm_output-f39cef17-0d4b-4dc6-8460-fd6005a9a553..
@@ -134,12 +159,12 @@ Bot f39cef17-0d4b-4dc6-8460-fd6005a9a553: The sky appears blue because of a phen
 
 ## Links
 
-* <https://cloud.google.com/dataflow/docs/notebooks/run_inference_pytorch>
-* <https://github.com/GoogleCloudPlatform/dataflow-cookbook/tree/main/Python/pubsub>
-* <https://cloud.google.com/dataflow/docs/notebooks/run_inference_generative_ai>
-* <https://cloud.google.com/dataflow/docs/machine-learning/gemma-run-inference>
-* <https://www.kaggle.com/models/google/gemma>
-* <https://www.tensorflow.org/install/source#gpu>
-* <https://pytorch.org/get-started/locally/>
-* <https://catalog.ngc.nvidia.com/orgs/nvidia/containers/cuda/tags>
-* <https://www.tensorflow.org/install/pip>
+* [Dataflow Inference with PyTorch](https://cloud.google.com/dataflow/docs/notebooks/run_inference_pytorch)
+* [Dataflow Pub/Sub Example](https://github.com/GoogleCloudPlatform/dataflow-cookbook/tree/main/Python/pubsub)
+* [Generative AI with Dataflow](https://cloud.google.com/dataflow/docs/notebooks/run_inference_generative_ai)
+* [Running Inference with Gemma](https://cloud.google.com/dataflow/docs/machine-learning/gemma-run-inference)
+* [Gemma Model on Kaggle](https://www.kaggle.com/models/google/gemma)
+* [TensorFlow GPU Installation](https://www.tensorflow.org/install/source#gpu)
+* [PyTorch Installation](https://pytorch.org/get-started/locally/)
+* [NVIDIA CUDA Containers](https://catalog.ngc.nvidia.com/orgs/nvidia/containers/cuda/tags)
+* [TensorFlow PIP Installation](https://www.tensorflow.org/install/pip)
