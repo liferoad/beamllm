@@ -15,15 +15,21 @@
 
 # standard libraries
 import os
+import time
 import uuid
 from concurrent.futures import TimeoutError
 
 # third party libraries
 from dotenv import load_dotenv
 from google.cloud import pubsub_v1
+from rich.console import Console
+from rich.markdown import Markdown
 
 # Load environment variables from .env file
 load_dotenv()
+
+# rich console
+console = Console()
 
 # Set project ID and Pub/Sub topic names
 project_id = os.environ["PROJECT_ID"]
@@ -49,28 +55,37 @@ except Exception as e:
     print(f"Subscription may already exist: {e}")
 
 is_message_received = False
+current_time = time.time()
 
 
 def callback(message):
     bot = message.data.decode("utf-8")
     id = message.attributes.get("id")
-    print(f"Bot {id}: {bot}")
+    markdown = Markdown(bot)
     global is_message_received
+    global current_time
     is_message_received = True
     message.ack()
+    # output
+    processing_time = time.time() - current_time
+    console.log(f"[bold green]Bot {id[-4:]}[/bold green]:", markdown, f"processing time(s):{processing_time:.2f}")
 
 
 streaming_pull_future = subscriber.subscribe(subscription_path, callback=callback)
-print(f"Listening for messages on {subscription_path}..\n")
+
+console.log(f"Listening for messages on [bold cyan]{subscription_path}[/bold cyan]..\n")
+console.log(f"Session id: [bold cyan]{session_id}[/bold cyan]..\n")
 
 
 while True:
     try:
-        text = input("Enter message to chat (Ctrl-Break to exit): ")
+        text = console.input("[bold blue]User[/bold blue] (Ctrl-Break to exit): ")
         publisher.publish(topic_a_path, data=text.encode("utf-8"), id=session_id)
 
         # keep waiting for the message
         is_message_received = False
+        current_time = time.time()
+
         while not is_message_received:
             try:
                 streaming_pull_future.result(timeout=5)
@@ -80,11 +95,11 @@ while True:
     except KeyboardInterrupt:
         streaming_pull_future.cancel()  # Trigger the shutdown.
         streaming_pull_future.result()  # Block until the shutdown is complete.
-        print("Exiting...")
+        console.print("[bold red]Exiting...[/bold red]")
         break
 
 
 with subscriber:
     subscriber.delete_subscription(request={"subscription": subscription_path})
-print(f"Subscription deleted: {subscription_path}.")
-print("Chat finished.")
+console.log(f"Subscription deleted: {subscription_path}.")
+console.log("Chat finished.")

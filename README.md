@@ -155,7 +155,6 @@ Bot f39cef17-0d4b-4dc6-8460-fd6005a9a553: The sky appears blue because of a phen
 ## To Do
 
 * Polish the interface to package everything with a CLI package
-* Polish the chat client
 
 ## Links
 
