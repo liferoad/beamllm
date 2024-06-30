@@ -59,7 +59,7 @@ make docker_ollama
 make run-gpu
 # Chat with the model
 make run-chat
-# Chat with the model using mesop
+# Chat with the model using mesop + chat history
 mesop beamllm/mesop_chat.py
 ```
 
